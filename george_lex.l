@@ -4,6 +4,8 @@
 #include "george_parse.h"
 %}
 %%
+\t                            return TAB
+
 function                      return FUNCTION
 return                        return RETURN
 do                            return DO
