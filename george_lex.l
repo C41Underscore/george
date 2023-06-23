@@ -11,18 +11,27 @@ return                        return RETURN
 do                            return DO
 while                         return WHILE
 for                           return FOR
+import                        return IMPORT
+from                          return FROM
+true                          return TRUE
+false                         return FALSE
+null                          return NULL
 
 [_a-zA-Z]+[_a-zA-Z0-9]*       return IDENTIFIER
 
-int|float|char                return TYPE
+int|float|char|void           return TYPE
 [0-9]+                        return INTEGER
 [0-9]+.[0-9]*|[0-9]*.[0-9]+   return FLOAT
 '[a-zA-Z]'                    return CHAR
+"(.*?)"                       return STRING
 
 ;                             return SEMICOLON
 (                             return LEFT_BRACKET
 )                             return RIGHT_BRACKET
+[                             return LEFT_SQUARE_BRACKET
+]                             return RIGHT_SQUARE_BRACKET
 :                             return COLON
+,                             return COMMA
 \n                            return NEWLINE
 
 =                             return EQUAL
@@ -40,4 +49,8 @@ int|float|char                return TYPE
 <=                            return LTQ
 >                             return GT
 =>                            return GTQ
+
+and                           return AND
+or                            return OR
+not                           return NOT
 %%
