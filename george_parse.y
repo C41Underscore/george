@@ -8,6 +8,7 @@ extern "C" {
 
 extern int yylex();
 extern int yyparse();
+extern FILE *yyin;
 
 void yyerror(const char *str)
 {
@@ -21,7 +22,14 @@ int yywrap()
 
 void main()
 {
-        yyparse();
+	FILE *source; int i;
+	source = fopen("test.george", "r");
+	yyin = source;
+	do
+	{
+		yyparse();
+	} while(!feof(yyin));
+
 }
 
 #ifdef __cplusplus
@@ -30,13 +38,15 @@ void main()
 
 %}
 
-%token FUNCTION RETURN DO WHILE FOR IMPORT FROM
+%token FUNCTION RETURN DO WHILE FOR IMPORT FROM TRUE FALSE NULL_CHAR
 %token IDENTIFIER
-%token TYPE INTEGER FLOAT CHAR
-%token SEMICOLON LEFT_BRACKET RIGHT_BRACKET NEWLINE
+%token TYPE INTEGER FLOAT CHAR STRING
+%token SEMICOLON COLON COMMA NEWLINE
+%token LEFT_BRACKET RIGHT_BRACKET LEFT_SQUARE_BRACKET RIGHT_SQUARE_BRACKET LEFT_SCOPE_BRACKET RIGHT_SCOPE_BRACKET
 %token EQUAL PLUS MINUS DIVIDE MULTIPLY
 %token PLUS_INLINE MINUS_INLINE DIVIDE_INLINE MULTIPLY_INLINE
 %token EQ LT LTQ GT GTQ
+%token AND OR NOT
 
 %%
 
@@ -50,7 +60,7 @@ import_list:
 	import_statement import_list
 	;
 
-import_statment:
+import_statement:
 	IMPORT IDENTIFIER
 	|
 	FROM IDENTIFIER IMPORT identifier_list
@@ -81,12 +91,6 @@ parameter_list:
 parameter:
 	TYPE IDENTIFIER
 
-line:
-	statement
-	|
-        declaration
-        ;
-
 statements:
 	statement
 	|
@@ -108,7 +112,7 @@ statement:
 	;
 
 variable_declaration:
-	TYPE IDENTIFIER EQUALS expression
+	TYPE IDENTIFIER EQUAL expression
 	|
 	TYPE IDENTIFIER
 	;
@@ -116,7 +120,8 @@ variable_declaration:
 for:
 	FOR LEFT_BRACKET SEMICOLON SEMICOLON RIGHT_BRACKET COLON NEWLINE statements
 	|
-	FOR LEFT_BRACKET variable_declaration SEMICOLON SEMICOLON RIGHT_BRACKET COLON NEWLINE statements
+	FOR LEFT_BRACKET variable_declaration SEMICOLON SEMICOLON RIGHT_BRACKET COLON NEWLINE LEFT_SCOPE_BRACKET
+	statements RIGHT_SCOPE_BRACKET
 	|
 	FOR LEFT_BRACKET variable_declaration SEMICOLON relational_expression
 	SEMICOLON RIGHT_BRACKET COLON NEWLINE statements
@@ -144,12 +149,6 @@ while:
 
 return:
 	RETURN expression
-	;
-
-expression_list:
-	expression
-	|
-	expression NEWLINE expression_list
 	;
 
 expression:
@@ -211,6 +210,8 @@ operand:
 	|
 	FLOAT
 	|
+	STRING
+	|
 	IDENTIFIER
 	|
 	IDENTIFIER LEFT_SQUARE_BRACKET expression RIGHT_SQUARE_BRACKET
@@ -219,7 +220,7 @@ operand:
 	|
 	FALSE
 	|
-	NULL
+	NULL_CHAR
 	|
 	LEFT_BRACKET expression RIGHT_BRACKET
 	|
