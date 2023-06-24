@@ -64,32 +64,45 @@ import_statement:
 	IMPORT IDENTIFIER
 	|
 	FROM IDENTIFIER IMPORT identifier_list
+	;
 
 identifier_list:
 	IDENTIFIER
 	|
 	IDENTIFIER COMMA identifier_list
+	;
 
 functions:
 	function
 	|
 	function functions
+	;
 
 function:
 	function_decl COLON NEWLINE statements
+	;
 
 function_decl:
-	FUNCTION TYPE IDENTIFIER LEFT_BRACKET parameter_list RIGHT_BRACKET
+	FUNCTION TYPE IDENTIFIER LEFT_BRACKET parameters RIGHT_BRACKET
+	;
 
-parameter_list:
+parameters:
 	/* empty */
 	|
 	parameter
 	|
 	parameter COMMA parameter_list
+	;
+
+parameter_list:
+	/* empty */
+	|
+	parameter COMMA parameter_list
+	;
 
 parameter:
 	TYPE IDENTIFIER
+	;
 
 statements:
 	statement
@@ -118,33 +131,33 @@ variable_declaration:
 	;
 
 for:
-	FOR LEFT_BRACKET SEMICOLON SEMICOLON RIGHT_BRACKET COLON NEWLINE statements
+	FOR LEFT_BRACKET SEMICOLON SEMICOLON RIGHT_BRACKET COLON LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
 	|
 	FOR LEFT_BRACKET variable_declaration SEMICOLON SEMICOLON RIGHT_BRACKET COLON NEWLINE LEFT_SCOPE_BRACKET
 	statements RIGHT_SCOPE_BRACKET
 	|
 	FOR LEFT_BRACKET variable_declaration SEMICOLON relational_expression
-	SEMICOLON RIGHT_BRACKET COLON NEWLINE statements
+	SEMICOLON RIGHT_BRACKET COLON LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
 	|
 	FOR LEFT_BRACKET variable_declaration SEMICOLON relational_expression
-	SEMICOLON expression RIGHT_BRACKET COLON NEWLINE statements
+	SEMICOLON expression RIGHT_BRACKET COLON LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
 	|
 	FOR LEFT_BRACKET SEMICOLON relational_expression
-	SEMICOLON expression RIGHT_BRACKET COLON NEWLINE statements
+	SEMICOLON expression RIGHT_BRACKET COLON LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
 	|
-	FOR LEFT_BRACKET SEMICOLON SEMICOLON expression RIGHT_BRACKET COLON NEWLINE statements
+	FOR LEFT_BRACKET SEMICOLON SEMICOLON expression RIGHT_BRACKET COLON LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
 	|
-	FOR LEFT_BRACKET SEMICOLON relational_expression SEMICOLON RIGHT_BRACKET COLON NEWLINE statements
+	FOR LEFT_BRACKET SEMICOLON relational_expression SEMICOLON RIGHT_BRACKET COLON LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
 	|
-	FOR LEFT_BRACKET variable_declaration SEMICOLON SEMICOLON expression RIGHT_BRACKET COLON NEWLINE statements
+	FOR LEFT_BRACKET variable_declaration SEMICOLON SEMICOLON expression RIGHT_BRACKET COLON LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
 	;
 
 do:
-	DO COLON NEWLINE statements NEWLINE WHILE LEFT_BRACKET relational_expression RIGHT_BRACKET
+	DO COLON LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET WHILE LEFT_BRACKET relational_expression RIGHT_BRACKET
 	;
 
 while:
-	WHILE LEFT_BRACKET relational_expression RIGHT_BRACKET COLON NEWLINE statements
+	WHILE LEFT_BRACKET relational_expression RIGHT_BRACKET COLON LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
 	;
 
 return:
