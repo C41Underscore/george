@@ -27,6 +27,7 @@ void main()
 	yyin = source;
 	do
 	{
+		printf("reading\n");
 		yyparse();
 	} while(!feof(yyin));
 
@@ -69,35 +70,29 @@ import_statement:
 identifier_list:
 	IDENTIFIER
 	|
-	IDENTIFIER COMMA identifier_list
+	identifier_list COMMA IDENTIFIER
 	;
 
 functions:
 	function
 	|
-	function functions
+	functions function
 	;
 
 function:
-	function_decl COLON NEWLINE statements
+	function_decl LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
 	;
 
 function_decl:
-	FUNCTION TYPE IDENTIFIER LEFT_BRACKET parameters RIGHT_BRACKET
-	;
-
-parameters:
-	/* empty */
-	|
-	parameter
-	|
-	parameter COMMA parameter_list
+	FUNCTION TYPE IDENTIFIER LEFT_BRACKET parameter_list RIGHT_BRACKET
 	;
 
 parameter_list:
 	/* empty */
 	|
-	parameter COMMA parameter_list
+	parameter
+	|
+	parameter_list COMMA parameter
 	;
 
 parameter:
@@ -107,7 +102,7 @@ parameter:
 statements:
 	statement
 	|
-	statement NEWLINE statements
+	statements NEWLINE statement
 	;
 
 statement:
@@ -165,47 +160,47 @@ return:
 	;
 
 expression:
-	relational_expression AND expression
+	expression AND relational_expression
 	|
-	relational_expression OR expression
+	expression OR relational_expression
 	|
 	relational_expression
 	;
 
 relational_expression:
-	arithmetic_expression EQ relational_expression
+	relational_expression EQ arithmetic_expression
 	|
-	arithmetic_expression LT relational_expression
+	relational_expression LT arithmetic_expression
 	|
-	arithmetic_expression GT relational_expression
+	relational_expression GT arithmetic_expression
 	|
-	arithmetic_expression LTQ relational_expression
+	relational_expression LTQ arithmetic_expression
 	|
-	arithmetic_expression GTQ relational_expression
+	relational_expression GTQ arithmetic_expression
 	|
 	arithmetic_expression
 	;
 
 arithmetic_expression:
-	term PLUS arithmetic_expression
+	arithmetic_expression PLUS term
 	|
-	term MINUS arithmetic_expression
+	arithmetic_expression MINUS term
 	|
-	term PLUS_INLINE arithmetic_expression
+	arithmetic_expression PLUS_INLINE term
 	|
-	term MINUS_INLINE arithmetic_expression
+	arithmetic_expression MINUS_INLINE term
 	|
 	term
 	;
 
 term:
-	factor MULTIPLY term
+	term MULTIPLY factor
 	|
-	factor DIVIDE term
+	term DIVIDE factor
 	|
-	factor MULTIPLY_INLINE term
+	term MULTIPLY_INLINE factor
 	|
-	factor DIVIDE_INLINE term
+	term DIVIDE_INLINE factor
 	|
 	factor
 	;
@@ -247,6 +242,6 @@ function_call:
 arguments:
 	expression
 	|
-	expression COMMA arguments
+	arguments COMMA expression
 
 %%
