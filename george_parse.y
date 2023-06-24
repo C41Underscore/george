@@ -5,6 +5,7 @@ extern "C" {
 #endif
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 extern int yylex();
 extern int yyparse();
@@ -23,14 +24,27 @@ int yywrap()
 void main()
 {
 	FILE *source; int i;
-	source = fopen("test.george", "r");
+	source = fopen("../test.george", "r");
+
+	if(source == NULL)
+	{
+		yyerror("Invalid source file");
+		exit(0);
+	}
+
 	yyin = source;
+
+	char buf[64];
+	fgets(buf, 64, source);
+	printf("%s\n", buf);
+
 	do
 	{
-		printf("reading\n");
 		yyparse();
 	} while(!feof(yyin));
 
+	fclose(source);
+	exit(0);
 }
 
 #ifdef __cplusplus
@@ -52,52 +66,52 @@ void main()
 %%
 
 program:
-	import_list functions
+	import_list functions {printf("program\n");}
 	;
 
 import_list:
-	/* empty */
+	import_statement
 	|
-	import_statement import_list
-	;
+	import_list NEWLINE import_statement
+	{printf("import_list\n");} ;
 
 import_statement:
 	IMPORT IDENTIFIER
 	|
 	FROM IDENTIFIER IMPORT identifier_list
-	;
+	{printf("import_statement\n");} ;
 
 identifier_list:
 	IDENTIFIER
 	|
 	identifier_list COMMA IDENTIFIER
-	;
+	{printf("identifier_list\n");} ;
 
 functions:
 	function
 	|
 	functions function
-	;
+	{printf("functions\n");} ;
 
 function:
 	function_decl LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
-	;
+	{printf("function\n");} ;
 
 function_decl:
+	FUNCTION TYPE IDENTIFIER LEFT_BRACKET RIGHT_BRACKET
+	|
 	FUNCTION TYPE IDENTIFIER LEFT_BRACKET parameter_list RIGHT_BRACKET
-	;
+	{printf("function_decl\n");} ;
 
 parameter_list:
-	/* empty */
-	|
 	parameter
 	|
 	parameter_list COMMA parameter
-	;
+	{printf("parameter_list\n");} ;
 
 parameter:
 	TYPE IDENTIFIER
-	;
+	{printf("parameter\n");} ;
 
 statements:
 	statement
