@@ -1,8 +1,10 @@
 %{
 #include <stdio.h>
 #include <string.h>
-#include "george_parse.h"
+#include "george_parse.tab.h"
 %}
+
+%option yylineno
 
 %%
 function                         {return FUNCTION; printf("function\n");}
@@ -16,13 +18,13 @@ true                             {return TRUE;}
 false                            {return FALSE;}
 null                             {return NULL_CHAR;}
 
-[_a-zA-Z]+[_a-zA-Z0-9]*          {return IDENTIFIER;}
-
 int|float|char|void              {return TYPE;}
 [0-9]+                           {return INTEGER;}
-[0-9]+.[0-9]*|[0-9]*.[0-9]+      {return FLOAT;}
+[0-9]+\.[0-9]*|[0-9]*\.[0-9]+      {return FLOAT;}
 \'[a-zA-Z]\'                     {return CHAR;}
 \"(.*?)\"                        {return STRING;}
+
+[_a-zA-Z]+[_a-zA-Z0-9]*          {return IDENTIFIER;}
 
 ;                                {return SEMICOLON;}
 \(                               {return LEFT_BRACKET;}
@@ -33,7 +35,6 @@ int|float|char|void              {return TYPE;}
 \}                               {return RIGHT_SCOPE_BRACKET;}
 :                                {return COLON;}
 ,                                {return COMMA;}
-\n                               {return NEWLINE;}
 
 =                                {return EQUAL;}
 \+                               {return PLUS;}

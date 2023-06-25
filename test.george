@@ -1,16 +1,16 @@
-from stdlib import print
+from stdlib import print;
 
 function float sqrt(float x)
 {
-    float z = x
+    float z = x;
     for(int i = 0; i < 10; i = i + 1)
     {
-        z -= (z*z - x)/2*z
+        z -= (z*z - x) / 2*z;
     }
-    return z
+    return z;
 }
 
 function int main()
 {
-    result = sqrt(4.0)
+    result = sqrt(4.0);
 }

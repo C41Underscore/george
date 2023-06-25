@@ -10,10 +10,13 @@ extern "C" {
 extern int yylex();
 extern int yyparse();
 extern FILE *yyin;
+extern int yylineno;
+extern int yy_flex_debug;
+
 
 void yyerror(const char *str)
 {
-        fprintf(stderr,"error: %s\n",str);
+        fprintf(stderr,"error: %s\nline number: %d\n",str, yylineno);
 }
 
 int yywrap()
@@ -21,10 +24,13 @@ int yywrap()
         return 1;
 }
 
-void main()
+void main(int argc, char *argv[])
 {
+	yy_flex_debug = 1;
+
 	FILE *source; int i;
-	source = fopen("../test.george", "r");
+	char *source_file = "./test.george";
+	source = fopen(source_file, "r");
 
 	if(source == NULL)
 	{
@@ -33,10 +39,6 @@ void main()
 	}
 
 	yyin = source;
-
-	char buf[64];
-	fgets(buf, 64, source);
-	printf("%s\n", buf);
 
 	do
 	{
@@ -63,74 +65,76 @@ void main()
 %token EQ LT LTQ GT GTQ
 %token AND OR NOT
 
+%define parse.error verbose
+
 %%
 
 program:
-	import_list functions {printf("program\n");}
+	import_list functions
 	;
 
 import_list:
-	import_statement
+	import_statement SEMICOLON
 	|
-	import_list NEWLINE import_statement
-	{printf("import_list\n");} ;
+	import_list SEMICOLON import_statement
+	;
 
 import_statement:
 	IMPORT IDENTIFIER
 	|
 	FROM IDENTIFIER IMPORT identifier_list
-	{printf("import_statement\n");} ;
+	;
 
 identifier_list:
 	IDENTIFIER
 	|
 	identifier_list COMMA IDENTIFIER
-	{printf("identifier_list\n");} ;
+	;
 
 functions:
 	function
 	|
 	functions function
-	{printf("functions\n");} ;
+	;
 
 function:
 	function_decl LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
-	{printf("function\n");} ;
+	;
 
 function_decl:
 	FUNCTION TYPE IDENTIFIER LEFT_BRACKET RIGHT_BRACKET
 	|
 	FUNCTION TYPE IDENTIFIER LEFT_BRACKET parameter_list RIGHT_BRACKET
-	{printf("function_decl\n");} ;
+	;
 
 parameter_list:
 	parameter
 	|
 	parameter_list COMMA parameter
-	{printf("parameter_list\n");} ;
+	;
 
 parameter:
 	TYPE IDENTIFIER
-	{printf("parameter\n");} ;
+	;
 
 statements:
 	statement
 	|
-	statements NEWLINE statement
+	statement statements
 	;
 
 statement:
-	variable_declaration
+	variable_declaration SEMICOLON
 	|
 	for
 	|
-	do
+	do SEMICOLON
 	|
 	while
 	|
-	return
+	return SEMICOLON
 	|
-	expression
+	expression SEMICOLON
 	;
 
 variable_declaration:
@@ -140,33 +144,33 @@ variable_declaration:
 	;
 
 for:
-	FOR LEFT_BRACKET SEMICOLON SEMICOLON RIGHT_BRACKET COLON LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
+	FOR LEFT_BRACKET SEMICOLON SEMICOLON RIGHT_BRACKET LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
 	|
-	FOR LEFT_BRACKET variable_declaration SEMICOLON SEMICOLON RIGHT_BRACKET COLON NEWLINE LEFT_SCOPE_BRACKET
+	FOR LEFT_BRACKET variable_declaration SEMICOLON SEMICOLON RIGHT_BRACKET LEFT_SCOPE_BRACKET
 	statements RIGHT_SCOPE_BRACKET
 	|
 	FOR LEFT_BRACKET variable_declaration SEMICOLON relational_expression
-	SEMICOLON RIGHT_BRACKET COLON LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
+	SEMICOLON RIGHT_BRACKET LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
 	|
 	FOR LEFT_BRACKET variable_declaration SEMICOLON relational_expression
-	SEMICOLON expression RIGHT_BRACKET COLON LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
+	SEMICOLON expression RIGHT_BRACKET LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
 	|
 	FOR LEFT_BRACKET SEMICOLON relational_expression
-	SEMICOLON expression RIGHT_BRACKET COLON LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
+	SEMICOLON expression RIGHT_BRACKET LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
 	|
-	FOR LEFT_BRACKET SEMICOLON SEMICOLON expression RIGHT_BRACKET COLON LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
+	FOR LEFT_BRACKET SEMICOLON SEMICOLON expression RIGHT_BRACKET LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
 	|
-	FOR LEFT_BRACKET SEMICOLON relational_expression SEMICOLON RIGHT_BRACKET COLON LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
+	FOR LEFT_BRACKET SEMICOLON relational_expression SEMICOLON RIGHT_BRACKET LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
 	|
-	FOR LEFT_BRACKET variable_declaration SEMICOLON SEMICOLON expression RIGHT_BRACKET COLON LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
+	FOR LEFT_BRACKET variable_declaration SEMICOLON SEMICOLON expression RIGHT_BRACKET LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
 	;
 
 do:
-	DO COLON LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET WHILE LEFT_BRACKET relational_expression RIGHT_BRACKET
+	DO LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET WHILE LEFT_BRACKET relational_expression RIGHT_BRACKET
 	;
 
 while:
-	WHILE LEFT_BRACKET relational_expression RIGHT_BRACKET COLON LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
+	WHILE LEFT_BRACKET relational_expression RIGHT_BRACKET LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
 	;
 
 return:
@@ -174,47 +178,53 @@ return:
 	;
 
 expression:
-	expression AND relational_expression
+	assignment_expression AND expression
 	|
-	expression OR relational_expression
+	assignment_expression OR expression
+	|
+	assignment_expression
+	;
+
+assignment_expression:
+	IDENTIFIER EQUAL relational_expression
 	|
 	relational_expression
 	;
 
 relational_expression:
-	relational_expression EQ arithmetic_expression
+	arithmetic_expression EQ relational_expression
 	|
-	relational_expression LT arithmetic_expression
+	arithmetic_expression LT relational_expression
 	|
-	relational_expression GT arithmetic_expression
+	arithmetic_expression GT relational_expression
 	|
-	relational_expression LTQ arithmetic_expression
+	arithmetic_expression LTQ relational_expression
 	|
-	relational_expression GTQ arithmetic_expression
+	arithmetic_expression GTQ relational_expression
 	|
 	arithmetic_expression
 	;
 
 arithmetic_expression:
-	arithmetic_expression PLUS term
+	term PLUS arithmetic_expression
 	|
-	arithmetic_expression MINUS term
+	term MINUS arithmetic_expression
 	|
-	arithmetic_expression PLUS_INLINE term
+	term PLUS_INLINE arithmetic_expression
 	|
-	arithmetic_expression MINUS_INLINE term
+	term MINUS_INLINE arithmetic_expression
 	|
 	term
 	;
 
 term:
-	term MULTIPLY factor
+	factor MULTIPLY term
 	|
-	term DIVIDE factor
+	factor DIVIDE term
 	|
-	term MULTIPLY_INLINE factor
+	factor MULTIPLY_INLINE term
 	|
-	term DIVIDE_INLINE factor
+	factor DIVIDE_INLINE term
 	|
 	factor
 	;
@@ -256,6 +266,6 @@ function_call:
 arguments:
 	expression
 	|
-	arguments COMMA expression
+	expression COMMA arguments
 
 %%
