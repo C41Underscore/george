@@ -7,12 +7,13 @@ extern "C" {
 #include <string.h>
 #include <stdlib.h>
 
+#include "../src/george.h"
+
 extern int yylex();
 extern int yyparse();
 extern FILE *yyin;
 extern int yylineno;
 extern int yy_flex_debug;
-
 
 void yyerror(const char *str)
 {
@@ -70,6 +71,11 @@ void main(int argc, char *argv[])
 %token AND OR NOT
 
 //%define parse.error verbose
+
+%union
+{
+	struct token *tok;
+}
 
 %%
 
