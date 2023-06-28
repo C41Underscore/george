@@ -7,12 +7,14 @@
 %option yylineno
 
 %%
-function                         {return FUNCTION; printf("function\n");}
-return                           {return RETURN; printf("return\n");}
-do                               {return DO; printf("do\n");}
-while                            {return WHILE; printf("while\n");}
-for                              {return FOR; printf("for\n");}
-import                           {return IMPORT; printf("import\n");}
+[ \t\r\n]                        ;  /* skip whitespace which is not part of a string */
+
+function                         {return FUNCTION;}
+return                           {return RETURN;}
+do                               {return DO;}
+while                            {return WHILE;}
+for                              {return FOR;}
+import                           {return IMPORT;}
 from                             {return FROM;}
 true                             {return TRUE;}
 false                            {return FALSE;}
@@ -20,7 +22,7 @@ null                             {return NULL_CHAR;}
 
 int|float|char|void              {return TYPE;}
 [0-9]+                           {return INTEGER;}
-[0-9]+\.[0-9]*|[0-9]*\.[0-9]+      {return FLOAT;}
+[0-9]+\.[0-9]*|[0-9]*\.[0-9]+    {return FLOAT;}
 \'[a-zA-Z]\'                     {return CHAR;}
 \"(.*?)\"                        {return STRING;}
 

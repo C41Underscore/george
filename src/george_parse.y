@@ -24,13 +24,12 @@ int yywrap()
         return 1;
 }
 
-void main(int argc, char *argv[])
+int george(int numSourceFiles, char *sourceFiles[])
 {
-	yy_flex_debug = 1;
+	yy_flex_debug = 0;
 
 	FILE *source; int i;
-	char *source_file = "./test.george";
-	source = fopen(source_file, "r");
+	source = fopen(sourceFiles[1], "r");
 
 	if(source == NULL)
 	{
@@ -46,6 +45,11 @@ void main(int argc, char *argv[])
 	} while(!feof(yyin));
 
 	fclose(source);
+}
+
+void main(int argc, char *argv[])
+{
+	george(argc, argv);
 	exit(0);
 }
 
@@ -65,7 +69,7 @@ void main(int argc, char *argv[])
 %token EQ LT LTQ GT GTQ
 %token AND OR NOT
 
-%define parse.error verbose
+//%define parse.error verbose
 
 %%
 
