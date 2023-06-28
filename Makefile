@@ -14,7 +14,7 @@ generate_source:
 	mv *.yy.c ${BUILD}
 
 compile:
-	gcc -c ${BUILD}/george_parse.tab.c ${BUILD}/george_parse.tab.h ${BUILD}/lex.yy.c
+	gcc -c ${SRC}/george.h ${BUILD}/george_parse.tab.c ${BUILD}/george_parse.tab.h ${BUILD}/lex.yy.c
 	mv *.o ${BUILD}
 
 link:
