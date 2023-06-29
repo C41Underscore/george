@@ -80,7 +80,7 @@ void main(int argc, char *argv[])
 %type <tok> EQ LT LTQ GT GTQ
 %type <tok> AND OR NOT
 
-//%define parse.error verbose
+%define parse.error verbose
 
 %union
 {
@@ -96,7 +96,7 @@ program:
 import_list:
 	import_statement SEMICOLON
 	|
-	import_list SEMICOLON import_statement
+	import_statement SEMICOLON import_list
 	;
 
 import_statement:
@@ -200,6 +200,8 @@ if:
 	;
 
 else:
+	/* empty */
+	|
 	ELSE statement
 	|
 	ELSE LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
