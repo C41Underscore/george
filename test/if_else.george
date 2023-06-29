@@ -1,0 +1,16 @@
+from stdlib import print;
+from math import rand_int;
+
+function int main()
+{
+    int a = rand_int(0, 1);
+    if(a == 0)
+    {
+        print("cheese");
+    }
+    else
+    {
+        print("crackers");
+    }
+    return 0;
+}
