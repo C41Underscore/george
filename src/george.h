@@ -2,10 +2,21 @@
 // Created by c41 on 28/06/23.
 //
 
-#ifndef FLEX_BISON_TEST_GEORGE_H
-#define FLEX_BISON_TEST_GEORGE_H
+#ifndef GEORGE_H
+#define GEORGE_H
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 #define MAX_IDENTIFIER_LENGTH 256
+
+extern int yyparse();
+extern void yyerror();
+extern char* yytext;
+extern int yylineno;
+extern int yy_flex_debug;
+extern FILE *yyin;
 
 enum TOKEN_TYPE
 {
@@ -25,4 +36,17 @@ typedef struct token
     unsigned int line;
 } token;
 
-#endif //FLEX_BISON_TEST_GEORGE_H
+typedef struct ast_node
+{
+    struct ast_node *parent;
+    struct token *node;
+    unsigned int numChildren;
+    struct ast_node *children;
+} AST;
+
+static struct ast_node *tree_root;
+
+struct token *newToken(int type);
+int george(int numFlags, char *flags[], int numSourceFiles, char *sourceFiles[]);
+
+#endif // GEORGE_H

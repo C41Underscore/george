@@ -5,15 +5,6 @@
 
 #include "george_parse.tab.h"
 #include "../src/george.h"
-
-struct token *newToken(int type)
-{
-    struct token *new_tok = (struct token *)malloc(sizeof(struct token));
-    new_tok->type = type;
-    strncpy(new_tok->value, yytext, MAX_IDENTIFIER_LENGTH);
-    new_tok->line = yylineno;
-    return new_tok;
-}
 %}
 
 %option yylineno

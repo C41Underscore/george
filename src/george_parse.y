@@ -25,32 +25,10 @@ int yywrap()
         return 1;
 }
 
-int george(int numSourceFiles, char *sourceFiles[])
-{
-	yy_flex_debug = 0;
-
-	FILE *source; int i;
-	source = fopen(sourceFiles[1], "r");
-
-	if(source == NULL)
-	{
-		yyerror("Invalid source file");
-		exit(0);
-	}
-
-	yyin = source;
-
-	do
-	{
-		yyparse();
-	} while(!feof(yyin));
-
-	fclose(source);
-}
-
 void main(int argc, char *argv[])
 {
-	george(argc, argv);
+	//  Process inputs before starting compiler
+	george(0, NULL, argc - 1, argv);
 	exit(0);
 }
 
@@ -124,7 +102,7 @@ function:
 function_decl:
 	FUNCTION TYPE IDENTIFIER LEFT_BRACKET RIGHT_BRACKET
 	|
-	FUNCTION TYPE IDENTIFIER LEFT_BRACKET parameter_list RIGHT_BRACKET {printf("%s\n", $3->value);}
+	FUNCTION TYPE IDENTIFIER LEFT_BRACKET parameter_list RIGHT_BRACKET
 	;
 
 parameter_list:
