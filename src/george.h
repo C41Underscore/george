@@ -38,10 +38,9 @@ typedef struct token
 
 typedef struct ast_node
 {
-    struct ast_node *parent;
     struct token *node;
-    unsigned int numChildren;
-    struct ast_node *children;
+    struct ast_node *left;
+    struct ast_node *right;
 } AST;
 
 static struct ast_node *tree_root;

@@ -40,6 +40,7 @@ extern "C" {
         }
 
         tree_root = (struct ast_node*)malloc(sizeof(struct ast_node));
+        tree_root->node = NULL;
 
         yyin = source;
         int return_code = 0;

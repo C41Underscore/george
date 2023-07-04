@@ -1,3 +1,4 @@
 george
 *.yy.c
 *.tab.c
+*.gch
