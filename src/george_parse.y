@@ -58,17 +58,22 @@ void main(int argc, char *argv[])
 %type <tok> EQ LT LTQ GT GTQ
 %type <tok> AND OR NOT
 
+%type <node> program import_list import_statement identifier_list
+%type <node> functions function function_decl function_call
+%type <node> operand
+
 %define parse.error verbose
 
 %union
 {
 	struct token *tok;
+	struct ast_node *node;
 }
 
 %%
 
 program:
-	import_list functions
+	import_list functions {add_node(tree_root, $1, $2);}
 	;
 
 import_list:
@@ -78,25 +83,25 @@ import_list:
 	;
 
 import_statement:
-	IMPORT IDENTIFIER
+	IMPORT IDENTIFIER {add_node($$, create_node($1), create_node($2));}
 	|
-	FROM IDENTIFIER IMPORT identifier_list
+	FROM IDENTIFIER IMPORT identifier_list {$$ = create_node($2); add_node($$, $4, NULL);}
 	;
 
 identifier_list:
-	IDENTIFIER
+	IDENTIFIER {$$ = create_node($1);}
 	|
-	identifier_list COMMA IDENTIFIER
+	IDENTIFIER COMMA identifier_list {$$ = create_node($1); add_node($$, $3, NULL);}
 	;
 
 functions:
-	function
+	function {add_node($$, $1, NULL);}
 	|
-	functions function
+	function functions {add_node($$, $1, $2);}
 	;
 
 function:
-	function_decl LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
+	function_decl LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET {add_node($$, $1, NULL);}
 	;
 
 function_decl:
@@ -249,21 +254,21 @@ factor:
 	;
 
 operand:
-	INTEGER
+	INTEGER {$$ = create_node($1);}
 	|
-	FLOAT
+	FLOAT {$$ = create_node($1);}
 	|
-	STRING
+	STRING {$$ = create_node($1);}
 	|
-	IDENTIFIER
+	IDENTIFIER {$$ = create_node($1);}
 	|
 	IDENTIFIER LEFT_SQUARE_BRACKET expression RIGHT_SQUARE_BRACKET
 	|
-	TRUE
+	TRUE {$$ = create_node($1);}
 	|
-	FALSE
+	FALSE {$$ = create_node($1);}
 	|
-	NULL_CHAR
+	NULL_CHAR {$$ = create_node($1);}
 	|
 	LEFT_BRACKET expression RIGHT_BRACKET
 	|

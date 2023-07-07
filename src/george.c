@@ -39,7 +39,7 @@ extern "C" {
             exit(1);
         }
 
-        tree_root = (struct ast_node*)malloc(sizeof(struct ast_node));
+        tree_root = (struct ast_node*)malloc(sizeof (struct ast_node));
         tree_root->node = NULL;
 
         yyin = source;
@@ -50,6 +50,22 @@ extern "C" {
         } while(!feof(yyin));
 
         fclose(source);
+    }
+
+    struct ast_node *create_node(struct token *tok)
+    {
+        struct ast_node *new_node = (struct ast_node*) malloc(sizeof (struct ast_node));
+        new_node->node = tok;
+        new_node->left = NULL;
+        new_node->right = NULL;
+        return new_node;
+    }
+
+    int add_node(struct ast_node *node, struct ast_node *left_node, struct ast_node *right_node)
+    {
+        node->left = left_node;
+        node->right = right_node;
+        return 0;
     }
 #ifdef __cplusplus
 }

@@ -48,4 +48,7 @@ static struct ast_node *tree_root;
 struct token *newToken(int type);
 int george(int numFlags, char *flags[], int numSourceFiles, char *sourceFiles[]);
 
+struct ast_node* create_node(struct token *tok);
+int add_node(struct ast_node *node, struct ast_node *left_node, struct ast_node *right_node);
+
 #endif // GEORGE_H
