@@ -9,7 +9,7 @@ clean:
 
 generate_source:
 	flex -d ${SRC}/george_lex.l
-	bison -d ${SRC}/george_parse.y
+	bison -d ${SRC}/george_parse.y -Wcounterexamples
 	mv *.tab.* ${BUILD}
 	mv *.yy.c ${BUILD}
 
