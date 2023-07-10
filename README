@@ -1,5 +1,5 @@
 Current things to do for project -
-- Formalise Lexicon
+- Convert Makefile back into CMake for debugging purposes
 - Formalise Grammar
 - Parse trees
 - Develop Parse tree
