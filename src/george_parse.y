@@ -59,8 +59,12 @@ void main(int argc, char *argv[])
 %type <tok> AND OR NOT
 
 %type <node> program import_list import_statement identifier_list
-%type <node> functions function function_decl function_call
-%type <node> operand
+%type <node> functions function function_decl
+%type <node> parameter_list parameter statements statement
+%type <node> variable_declaration for for_conditions for_var_init for_loop_stmts
+%type <node> do while if if_block else scope return bracketed_relational_expression
+%type <node> expression relational_expression arithmetic_expression
+%type <node> term factor operand function_call arguments
 
 %define parse.error verbose
 
@@ -77,9 +81,9 @@ program:
 	;
 
 import_list:
-	import_statement SEMICOLON
+	import_statement SEMICOLON {$$ = $1;}
 	|
-	import_statement SEMICOLON import_list
+	import_statement SEMICOLON import_list {add_node($$, $1, $3);}
 	;
 
 import_statement:
@@ -101,156 +105,165 @@ functions:
 	;
 
 function:
-	function_decl LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET {add_node($$, $1, NULL);}
+	function_decl scope {add_node($$, $1, NULL);}
 	;
 
 function_decl:
-	FUNCTION TYPE IDENTIFIER LEFT_BRACKET RIGHT_BRACKET
+	FUNCTION TYPE IDENTIFIER LEFT_BRACKET RIGHT_BRACKET {$$ = create_node($2); add_node($$, create_node($1), NULL);}
 	|
-	FUNCTION TYPE IDENTIFIER LEFT_BRACKET parameter_list RIGHT_BRACKET
+	FUNCTION TYPE IDENTIFIER LEFT_BRACKET parameter_list RIGHT_BRACKET {$$ = create_node($2); add_node($$, create_node($1), $5);}
 	;
 
 parameter_list:
-	parameter
+	parameter {add_node($$, $1, NULL);}
 	|
-	parameter_list COMMA parameter
+	parameter_list COMMA parameter {add_node($$, $3, $1);}
 	;
 
 parameter:
-	TYPE IDENTIFIER
+	TYPE IDENTIFIER {add_node($$, create_node($1), create_node($2));}
 	;
 
 statements:
-	statement
+	statement {add_node($$, $1, NULL);}
 	|
-	statement statements
+	statement statements {add_node($$, $1, $2);}
 	;
 
 statement:
-	variable_declaration SEMICOLON
+	variable_declaration SEMICOLON {add_node($$, $1, NULL);}
 	|
-	for
+	for {add_node($$, $1, NULL);}
 	|
-	do SEMICOLON
+	do SEMICOLON {add_node($$, $1, NULL);}
 	|
-	while
+	while {add_node($$, $1, NULL);}
 	|
-	if
+	if {add_node($$, $1, NULL);}
 	|
-	return SEMICOLON
+	return SEMICOLON {add_node($$, $1, NULL);}
 	|
-	expression SEMICOLON
+	expression SEMICOLON {add_node($$, $1, NULL);}
 	;
 
 variable_declaration:
-	TYPE IDENTIFIER EQUAL expression
+	TYPE IDENTIFIER EQUAL expression {$$ = create_node($2); add_node($$, create_node($1), create_node($3)); add_node($$->right, $4, NULL);}
 	|
-	TYPE IDENTIFIER
+	TYPE IDENTIFIER {add_node($$, create_node($1), create_node($2));}
 	;
 
 for:
-	FOR LEFT_BRACKET SEMICOLON SEMICOLON RIGHT_BRACKET LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
+	FOR for_conditions scope {$$ = create_node($1); add_node($$, $2, $3);}
+	;
+
+for_conditions:
+	LEFT_BRACKET for_var_init for_loop_stmts RIGHT_BRACKET {add_node($$, $2, $3);}
+	;
+
+for_var_init:
+	variable_declaration SEMICOLON {$$ = $1;}
 	|
-	FOR LEFT_BRACKET variable_declaration SEMICOLON SEMICOLON RIGHT_BRACKET LEFT_SCOPE_BRACKET
-	statements RIGHT_SCOPE_BRACKET
+	SEMICOLON {$$ = NULL;}
+	;
+
+for_loop_stmts:
+	relational_expression SEMICOLON expression {add_node($$, $1, $3);}
 	|
-	FOR LEFT_BRACKET variable_declaration SEMICOLON relational_expression
-	SEMICOLON RIGHT_BRACKET LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
+	relational_expression SEMICOLON {$$ = $1;}
 	|
-	FOR LEFT_BRACKET variable_declaration SEMICOLON relational_expression
-	SEMICOLON expression RIGHT_BRACKET LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
+	SEMICOLON expression {$$ = $2;}
 	|
-	FOR LEFT_BRACKET SEMICOLON relational_expression
-	SEMICOLON expression RIGHT_BRACKET LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
-	|
-	FOR LEFT_BRACKET SEMICOLON SEMICOLON expression RIGHT_BRACKET LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
-	|
-	FOR LEFT_BRACKET SEMICOLON relational_expression SEMICOLON RIGHT_BRACKET LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
-	|
-	FOR LEFT_BRACKET variable_declaration SEMICOLON SEMICOLON expression RIGHT_BRACKET LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
+	SEMICOLON {$$ = NULL;}
 	;
 
 do:
-	DO LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET WHILE LEFT_BRACKET relational_expression RIGHT_BRACKET
+	DO scope WHILE bracketed_relational_expression {$$ = create_node($1); add_node($$, $2, $4);}
 	;
 
 while:
-	WHILE LEFT_BRACKET relational_expression RIGHT_BRACKET LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
+	WHILE bracketed_relational_expression scope {$$ = create_node($1); add_node($$, $2, $3);}
 	;
 
 if:
-	IF LEFT_BRACKET relational_expression RIGHT_BRACKET LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET else
+	IF bracketed_relational_expression if_block {$$ = create_node($1); add_node($$, $2, $3);}
+	;
+
+if_block:
+	scope else {add_node($$, $1, $2);}
 	;
 
 else:
-	/* empty */
+	/* empty */ {$$ = NULL;}
 	|
-	ELSE statement
+	ELSE statement {$$ = create_node($1); add_node($$, $2, NULL);}
 	|
-	ELSE LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET
+	ELSE scope {$$ = create_node($1); add_node($$, $2, NULL);}
+	;
+
+scope:
+	LEFT_SCOPE_BRACKET statements RIGHT_SCOPE_BRACKET {$$ = $2;}
+	;
 
 return:
-	RETURN expression
+	RETURN expression {$$ = create_node($1); add_node($$, $2, NULL);}
+	;
+
+bracketed_relational_expression:
+	LEFT_BRACKET relational_expression RIGHT_BRACKET {$$ = $2;}
 	;
 
 expression:
-	assignment_expression AND expression
+	relational_expression AND expression {$$ = create_node($2); add_node($$, $1, $3);}
 	|
-	assignment_expression OR expression
+	relational_expression OR expression {$$ = create_node($2); add_node($$, $1, $3);}
 	|
-	assignment_expression
-	;
-
-assignment_expression:
-	IDENTIFIER EQUAL relational_expression
-	|
-	relational_expression
+	relational_expression {$$ = $1;}
 	;
 
 relational_expression:
-	arithmetic_expression EQ relational_expression
+	arithmetic_expression EQ relational_expression {$$ = create_node($2); add_node($$, $1, $3);}
 	|
-	arithmetic_expression LT relational_expression
+	arithmetic_expression LT relational_expression {$$ = create_node($2); add_node($$, $1, $3);}
 	|
-	arithmetic_expression GT relational_expression
+	arithmetic_expression GT relational_expression {$$ = create_node($2); add_node($$, $1, $3);}
 	|
-	arithmetic_expression LTQ relational_expression
+	arithmetic_expression LTQ relational_expression {$$ = create_node($2); add_node($$, $1, $3);}
 	|
-	arithmetic_expression GTQ relational_expression
+	arithmetic_expression GTQ relational_expression {$$ = create_node($2); add_node($$, $1, $3);}
 	|
-	arithmetic_expression
+	arithmetic_expression {$$ = $1;}
 	;
 
 arithmetic_expression:
-	term PLUS arithmetic_expression
+	term PLUS arithmetic_expression {$$ = create_node($2); add_node($$, $1, $3);}
 	|
-	term MINUS arithmetic_expression
+	term MINUS arithmetic_expression {$$ = create_node($2); add_node($$, $1, $3);}
 	|
-	term PLUS_INLINE arithmetic_expression
+	term PLUS_INLINE arithmetic_expression {$$ = create_node($2); add_node($$, $1, $3);}
 	|
-	term MINUS_INLINE arithmetic_expression
+	term MINUS_INLINE arithmetic_expression {$$ = create_node($2); add_node($$, $1, $3);}
 	|
-	term
+	term {$$ = $1;}
 	;
 
 term:
-	factor MULTIPLY term
+	factor MULTIPLY term {$$ = create_node($2); add_node($$, $1, $3);}
 	|
-	factor DIVIDE term
+	factor DIVIDE term {$$ = create_node($2); add_node($$, $1, $3);}
 	|
-	factor MULTIPLY_INLINE term
+	factor MULTIPLY_INLINE term {$$ = create_node($2); add_node($$, $1, $3);}
 	|
-	factor DIVIDE_INLINE term
+	factor DIVIDE_INLINE term {$$ = create_node($2); add_node($$, $1, $3);}
 	|
-	factor
+	factor {$$ = $1;}
 	;
 
 factor:
-	MINUS operand
+	MINUS operand  {$$ = create_node($1); add_node($$, $2, NULL);}
 	|
-	NOT operand
+	NOT operand {$$ = create_node($1); add_node($$, $2, NULL);}
 	|
-	operand
+	operand {$$ = $1;}
 	;
 
 operand:
@@ -262,7 +275,7 @@ operand:
 	|
 	IDENTIFIER {$$ = create_node($1);}
 	|
-	IDENTIFIER LEFT_SQUARE_BRACKET expression RIGHT_SQUARE_BRACKET
+	IDENTIFIER LEFT_SQUARE_BRACKET expression RIGHT_SQUARE_BRACKET {$$ = create_node($2); add_node($$, create_node($1), $3);}
 	|
 	TRUE {$$ = create_node($1);}
 	|
@@ -270,18 +283,18 @@ operand:
 	|
 	NULL_CHAR {$$ = create_node($1);}
 	|
-	LEFT_BRACKET expression RIGHT_BRACKET
+	LEFT_BRACKET expression RIGHT_BRACKET {$$ = $2;}
 	|
-	function_call
+	function_call {$$ = $1;}
 	;
 
 function_call:
-	IDENTIFIER LEFT_BRACKET arguments RIGHT_BRACKET
+	IDENTIFIER LEFT_BRACKET arguments RIGHT_BRACKET {add_node($$, create_node($1), $3);}
 	;
 
 arguments:
-	expression
+	expression {$$ = $1;}
 	|
-	expression COMMA arguments
+	expression COMMA arguments {add_node($$, $1, $3);}
 
 %%
