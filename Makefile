@@ -2,12 +2,15 @@ SRC = "src"
 BUILD = "build"
 TEST = "test"
 
-all: generate_source compile link
+all: clean generate_source compile link
 
 clean:
-	rm *.tab.c *.tab.h.gch *.yy.c *.yy.o *.tab.h *.tab.o
+	rm -r ${BUILD}
 
 generate_source:
+ifeq (,$(wildcard ${BUILD}))
+	mkdir ${BUILD}
+endif
 	flex -d ${SRC}/george_lex.l
 	bison -d ${SRC}/george_parse.y -Wcounterexamples
 	mv *.tab.* ${BUILD}
