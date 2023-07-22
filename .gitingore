@@ -1,6 +1,8 @@
 george
 *.yy.c
 *.tab.c
+*.tab.h
+*.o
 *.gch
-build
+build/*
 .vscode
