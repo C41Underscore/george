@@ -4,5 +4,5 @@ george
 *.tab.h
 *.o
 *.gch
-build/*
+./build/*
 .vscode
