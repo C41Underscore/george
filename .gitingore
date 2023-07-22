@@ -2,3 +2,5 @@ george
 *.yy.c
 *.tab.c
 *.gch
+build
+.vscode
