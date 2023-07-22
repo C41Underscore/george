@@ -14,6 +14,7 @@ extern int yyparse();
 extern FILE *yyin;
 extern int yylineno;
 extern int yy_flex_debug;
+extern struct ast_node *tree_root;
 
 void yyerror(const char *str)
 {
@@ -27,6 +28,9 @@ int yywrap()
 
 void main(int argc, char *argv[])
 {
+	#ifdef YYDEBUG
+		yydebug = 1;
+	#endif
 	//  Process inputs before starting compiler
 	george(0, NULL, argc - 1, argv);
 	exit(0);
@@ -63,7 +67,7 @@ void main(int argc, char *argv[])
 %type <node> parameter_list parameter statements statement
 %type <node> variable_declaration for for_conditions for_var_init for_loop_stmts
 %type <node> do while if if_block else scope return bracketed_relational_expression
-%type <node> expression relational_expression arithmetic_expression
+%type <node> expression assignment_expression relational_expression arithmetic_expression
 %type <node> term factor operand function_call arguments
 
 %define parse.error verbose
@@ -77,17 +81,17 @@ void main(int argc, char *argv[])
 %%
 
 program:
-	import_list functions {add_node(tree_root, $1, $2);}
+	import_list functions {$$ = create_node(NULL); add_node($$, $1, $2); set_tree_root($$);}
 	;
 
 import_list:
 	import_statement SEMICOLON {$$ = $1;}
 	|
-	import_statement SEMICOLON import_list {add_node($$, $1, $3);}
+	import_statement SEMICOLON import_list {$$ = create_node(NULL); add_node($$, $1, $3);}
 	;
 
 import_statement:
-	IMPORT IDENTIFIER {add_node($$, create_node($1), create_node($2));}
+	IMPORT IDENTIFIER {$$ = create_node(NULL); add_node($$, create_node($1), create_node($2));}
 	|
 	FROM IDENTIFIER IMPORT identifier_list {$$ = create_node($2); add_node($$, $4, NULL);}
 	;
@@ -99,13 +103,13 @@ identifier_list:
 	;
 
 functions:
-	function {add_node($$, $1, NULL);}
+	function {$$ = create_node(NULL); add_node($$, $1, NULL);}
 	|
-	function functions {add_node($$, $1, $2);}
+	function functions {$$ = create_node(NULL); add_node($$, $1, $2);}
 	;
 
 function:
-	function_decl scope {add_node($$, $1, NULL);}
+	function_decl scope {$$ = create_node(NULL); add_node($$, $1, NULL);}
 	;
 
 function_decl:
@@ -115,41 +119,41 @@ function_decl:
 	;
 
 parameter_list:
-	parameter {add_node($$, $1, NULL);}
+	parameter {$$ = create_node(NULL); add_node($$, $1, NULL);}
 	|
-	parameter_list COMMA parameter {add_node($$, $3, $1);}
+	parameter_list COMMA parameter {$$ = create_node(NULL); add_node($$, $3, $1);}
 	;
 
 parameter:
-	TYPE IDENTIFIER {add_node($$, create_node($1), create_node($2));}
+	TYPE IDENTIFIER {$$ = create_node(NULL); add_node($$, create_node($1), create_node($2));}
 	;
 
 statements:
-	statement {add_node($$, $1, NULL);}
+	statement {$$ = create_node(NULL); add_node($$, $1, NULL);}
 	|
-	statement statements {add_node($$, $1, $2);}
+	statement statements {$$ = create_node(NULL); add_node($$, $1, $2);}
 	;
 
 statement:
-	variable_declaration SEMICOLON {add_node($$, $1, NULL);}
+	variable_declaration SEMICOLON {$$ = create_node(NULL); add_node($$, $1, NULL);}
 	|
-	for {add_node($$, $1, NULL);}
+	for {$$ = create_node(NULL); add_node($$, $1, NULL);}
 	|
-	do SEMICOLON {add_node($$, $1, NULL);}
+	do SEMICOLON {$$ = create_node(NULL); add_node($$, $1, NULL);}
 	|
-	while {add_node($$, $1, NULL);}
+	while {$$ = create_node(NULL); add_node($$, $1, NULL);}
 	|
-	if {add_node($$, $1, NULL);}
+	if {$$ = create_node(NULL); add_node($$, $1, NULL);}
 	|
-	return SEMICOLON {add_node($$, $1, NULL);}
+	return SEMICOLON {$$ = create_node(NULL); add_node($$, $1, NULL);}
 	|
-	expression SEMICOLON {add_node($$, $1, NULL);}
+	expression SEMICOLON {$$ = create_node(NULL); add_node($$, $1, NULL);}
 	;
 
 variable_declaration:
 	TYPE IDENTIFIER EQUAL expression {$$ = create_node($2); add_node($$, create_node($1), create_node($3)); add_node($$->right, $4, NULL);}
 	|
-	TYPE IDENTIFIER {add_node($$, create_node($1), create_node($2));}
+	TYPE IDENTIFIER {$$ = create_node(NULL); add_node($$, create_node($1), create_node($2));}
 	;
 
 for:
@@ -157,23 +161,23 @@ for:
 	;
 
 for_conditions:
-	LEFT_BRACKET for_var_init for_loop_stmts RIGHT_BRACKET {add_node($$, $2, $3);}
+	LEFT_BRACKET for_var_init for_loop_stmts RIGHT_BRACKET {$$ = create_node(NULL); add_node($$, $2, $3);}
 	;
 
 for_var_init:
 	variable_declaration SEMICOLON {$$ = $1;}
 	|
-	SEMICOLON {$$ = NULL;}
+	SEMICOLON {$$ = create_node(NULL);}
 	;
 
 for_loop_stmts:
-	relational_expression SEMICOLON expression {add_node($$, $1, $3);}
+	relational_expression SEMICOLON expression {$$ = create_node(NULL); add_node($$, $1, $3); }
 	|
 	relational_expression SEMICOLON {$$ = $1;}
 	|
 	SEMICOLON expression {$$ = $2;}
 	|
-	SEMICOLON {$$ = NULL;}
+	SEMICOLON {$$ = create_node(NULL);}
 	;
 
 do:
@@ -189,11 +193,11 @@ if:
 	;
 
 if_block:
-	scope else {add_node($$, $1, $2);}
+	scope else {$$ = create_node(NULL); add_node($$, $1, $2);}
 	;
 
 else:
-	/* empty */ {$$ = NULL;}
+	/* empty */ {$$ = create_node(NULL);}
 	|
 	ELSE statement {$$ = create_node($1); add_node($$, $2, NULL);}
 	|
@@ -213,9 +217,15 @@ bracketed_relational_expression:
 	;
 
 expression:
-	relational_expression AND expression {$$ = create_node($2); add_node($$, $1, $3);}
+	assignment_expression EQUAL expression {$$ = create_node($2); add_node($$, $1, $3);}
 	|
-	relational_expression OR expression {$$ = create_node($2); add_node($$, $1, $3);}
+	assignment_expression {$$ = $1;}
+	;
+
+assignment_expression:
+	relational_expression AND assignment_expression {$$ = create_node($2); add_node($$, $1, $3);}
+	|
+	relational_expression OR assignment_expression {$$ = create_node($2); add_node($$, $1, $3);}
 	|
 	relational_expression {$$ = $1;}
 	;
@@ -289,12 +299,12 @@ operand:
 	;
 
 function_call:
-	IDENTIFIER LEFT_BRACKET arguments RIGHT_BRACKET {add_node($$, create_node($1), $3);}
+	IDENTIFIER LEFT_BRACKET arguments RIGHT_BRACKET {$$ = create_node(NULL); add_node($$, create_node($1), $3);}
 	;
 
 arguments:
 	expression {$$ = $1;}
 	|
-	expression COMMA arguments {add_node($$, $1, $3);}
+	expression COMMA arguments {$$ = create_node(NULL); add_node($$, $1, $3);}
 
 %%
