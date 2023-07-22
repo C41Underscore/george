@@ -44,6 +44,7 @@ typedef struct ast_node
 } AST;
 
 static struct ast_node *tree_root;
+int set_tree_root(struct ast_node *root);
 
 struct token *newToken(int type);
 int george(int numFlags, char *flags[], int numSourceFiles, char *sourceFiles[]);

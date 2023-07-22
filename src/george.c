@@ -11,6 +11,12 @@ extern "C" {
 
     #include "george.h"
 
+    int set_tree_root(struct ast_node *root)
+    {
+        tree_root = root;
+        return 0;
+    }
+
     struct token *newToken(int type)
     {
         struct token *new_tok = (struct token *)malloc(sizeof(struct token));
@@ -39,8 +45,7 @@ extern "C" {
             exit(1);
         }
 
-        tree_root = (struct ast_node*)malloc(sizeof (struct ast_node));
-        tree_root->node = NULL;
+        tree_root = create_node(NULL);
 
         yyin = source;
         int return_code = 0;
