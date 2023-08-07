@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define MAX_SYM_IDENTIFIER_LENGTH 256
 #define RECORD_ALLOC_BLOCK_SIZE 4

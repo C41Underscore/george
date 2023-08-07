@@ -30,5 +30,13 @@ int add_symbol(struct symbol_table *table, struct record *newRecord)
 
 int lookup(struct symbol_table *table, char* symbol)
 {
-
+    for(int i = 0; i < table->num_records; i++)
+    {
+        if(strncmp(table->records[i].name, symbol, strlen(table->records[i].name)) == 0)
+        {
+            printf("match!\n");
+            return 1;
+        }
+    }
+    return 0;
 }
