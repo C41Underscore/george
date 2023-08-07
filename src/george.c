@@ -67,8 +67,8 @@ int george(int numFlags, char *flags[], int numSourceFiles, char *sourceFiles[])
     } while(!feof(yyin));
 
     fclose(source);
-    symbol_table_init();
-    clean_symbol_tables();
+    struct symbol_table *tab = create_symbol_table();
+    clean_symbol_table(tab);
 
     return return_code;
 }

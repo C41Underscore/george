@@ -5,6 +5,7 @@
 #ifndef GEORGE_SYMBOL_TABLE_H
 #define GEORGE_SYMBOL_TABLE_H
 
+#include <stdio.h>
 #include <stdlib.h>
 
 #define MAX_SYM_IDENTIFIER_LENGTH 256
@@ -25,11 +26,8 @@ struct symbol_table
     int num_records;
 };
 
-static struct symbol_table *george_symbol_table;
-
-struct symbol_table *symbol_table_init();
-void clean_symbol_tables();
 struct symbol_table *create_symbol_table();
+void clean_symbol_table(struct symbol_table *table);
 int add_symbol(struct symbol_table *table, struct record *newRecord);
 int lookup(struct symbol_table *table, char* symbol);
 

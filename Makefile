@@ -25,7 +25,7 @@ endif
 	mv *.yy.c ${BUILD}
 
 compile:
-	${CC} -c ${SRC_FILES}
+	${CC} -g -c ${SRC_FILES}
 	mv *.o ${BUILD}
 
 link:
