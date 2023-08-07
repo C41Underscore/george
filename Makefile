@@ -6,9 +6,9 @@ SRC = "src"
 BUILD = "build"
 TEST = "test"
 
-SRC_FILES = ${BUILD}/george_parse.tab.h ${BUILD}/george_parse.tab.c ${BUILD}/lex.yy.c \
-			${SRC}/george.h ${SRC}/george.c
-OBJ_FILES = ${BUILD}/george.o ${BUILD}/lex.yy.o ${BUILD}/george_parse.tab.o
+SRC_FILES = ${SRC}/symbol_table.h ${SRC}/symbol_table.c ${SRC}/george.h ${SRC}/george.c \
+			${BUILD}/george_parse.tab.h ${BUILD}/george_parse.tab.c ${BUILD}/lex.yy.c
+OBJ_FILES = ${BUILD}/symbol_table.o ${BUILD}/george.o ${BUILD}/lex.yy.o ${BUILD}/george_parse.tab.o
 
 all: clean generate_source compile link
 

@@ -23,6 +23,22 @@ struct token *newToken(int type)
     return new_tok;
 }
 
+struct ast_node *create_node(struct token *tok)
+{
+    struct ast_node *new_node = (struct ast_node*) malloc(sizeof (struct ast_node));
+    new_node->node = tok;
+    new_node->left = NULL;
+    new_node->right = NULL;
+    return new_node;
+}
+
+int add_node(struct ast_node *node, struct ast_node *left_node, struct ast_node *right_node)
+{
+    node->left = left_node;
+    node->right = right_node;
+    return 0;
+}
+
 int george(int numFlags, char *flags[], int numSourceFiles, char *sourceFiles[])
 {
     yy_flex_debug = 0;
@@ -51,21 +67,8 @@ int george(int numFlags, char *flags[], int numSourceFiles, char *sourceFiles[])
     } while(!feof(yyin));
 
     fclose(source);
+    symbol_table_init();
+    clean_symbol_tables();
+
     return return_code;
-}
-
-struct ast_node *create_node(struct token *tok)
-{
-    struct ast_node *new_node = (struct ast_node*) malloc(sizeof (struct ast_node));
-    new_node->node = tok;
-    new_node->left = NULL;
-    new_node->right = NULL;
-    return new_node;
-}
-
-int add_node(struct ast_node *node, struct ast_node *left_node, struct ast_node *right_node)
-{
-    node->left = left_node;
-    node->right = right_node;
-    return 0;
 }
