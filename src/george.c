@@ -2,14 +2,16 @@
 // Created by c41 on 30/06/23.
 //
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
     #include <stdio.h>
     #include <string.h>
     #include <stdlib.h>
 
     #include "george.h"
+
+    #include "SymbolTable.hpp"
 
     int set_tree_root(struct ast_node *root)
     {
@@ -36,10 +38,8 @@ extern "C" {
             exit(1);
         }
 
-
         FILE *source; int i;
         source = fopen(sourceFiles[1], "r");
-
         if(source == NULL)
         {
             yyerror("invalid source file");
@@ -73,6 +73,6 @@ extern "C" {
         node->right = right_node;
         return 0;
     }
-#ifdef __cplusplus
-}
-#endif
+//#ifdef __cplusplus
+//}
+//#endif

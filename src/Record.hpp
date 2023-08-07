@@ -5,15 +5,18 @@
 #ifndef RECORD_H
 #define RECORD_H
 
+#include <string>
+
+class SymbolTable;
+
 class Record
 {
 public:
-    Record(string &id, int type, string &value);
-    ~Record();
+    Record(std::string &id, int type, std::string &value, SymbolTable *table);
 private:
-    string id;
+    std::string id;
     int type;
-    string value;
+    std::string value;
     SymbolTable *table;
 };
 

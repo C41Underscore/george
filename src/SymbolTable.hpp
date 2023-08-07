@@ -24,10 +24,10 @@ class SymbolTable
 public:
     SymbolTable();
     ~SymbolTable();
-    int AddSymbol(string &id, int type, string &value);
-    void LookUp(string &id);
+    int AddSymbol(std::string &id, int type, std::string &value);
+    void LookUp(std::string &id);
 private:
-    map<string, Record> table;
+    std::map<std::string, Record> *table;
 };
 
 #endif //SYMBOL_TABLE_H

@@ -2,7 +2,7 @@
 
 SymbolTable::SymbolTable()
 {
-    this->table = new map<string, Record>;
+    this->table = new std::map<std::string, Record>;
 };
 
 SymbolTable::~SymbolTable()
@@ -10,11 +10,11 @@ SymbolTable::~SymbolTable()
     delete this->table;
 };
 
-int SymbolTable::AddSymbol(string &id, int type, string &value)
+int SymbolTable::AddSymbol(std::string &id, int type, std::string &value)
 {
-    Record newRecord = new Record(id, type, value);
-
+    auto *newRecord = new Record(id, type, value, new SymbolTable());
+    return 0;
 };
 
-void SymbolTable::LookUp(string &id)
+void SymbolTable::LookUp(std::string &id)
 {};

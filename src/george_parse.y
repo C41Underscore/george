@@ -26,14 +26,14 @@ int yywrap()
         return 1;
 }
 
-void main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	#ifdef YYDEBUG
 		yydebug = 1;
 	#endif
 	//  Process inputs before starting compiler
 	george(0, NULL, argc - 1, argv);
-	exit(0);
+	return 0;
 }
 
 #ifdef __cplusplus

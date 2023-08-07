@@ -12,7 +12,7 @@
 #define MAX_IDENTIFIER_LENGTH 256
 
 extern int yyparse();
-extern void yyerror();
+extern void yyerror(const char *str);
 extern char* yytext;
 extern int yylineno;
 extern int yy_flex_debug;
