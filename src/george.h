@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #include "symbol_table.h"
 
@@ -41,8 +42,7 @@ typedef struct token
 typedef struct ast_node
 {
     struct token *node;
-    struct ast_node *left;
-    struct ast_node *right;
+    struct ast_node *children;
 } AST;
 
 static struct ast_node *tree_root;
@@ -52,6 +52,12 @@ struct token *newToken(int type);
 int george(int numFlags, char *flags[], int numSourceFiles, char *sourceFiles[]);
 
 struct ast_node* create_node(struct token *tok);
-int add_node(struct ast_node *node, struct ast_node *left_node, struct ast_node *right_node);
+//  Create Basic Token
+struct token* cbt(char* tag);
+int add_node(struct ast_node *node, int numChildren, ...);
+
+//  SEMANTIC ANALYSIS
+
+int george_semantic_analysis(struct ast_node *root);
 
 #endif // GEORGE_H

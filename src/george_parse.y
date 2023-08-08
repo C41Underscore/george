@@ -81,51 +81,58 @@ int main(int argc, char *argv[])
 %%
 
 program:
-	import_list functions {$$ = create_node(NULL); add_node($$, $1, $2); set_tree_root($$);}
+	import_list functions
+	{$$ = create_node(cbt("program")); add_node($$, 2, $1, $2); set_tree_root($$);}
 	;
 
 import_list:
-	import_statement SEMICOLON {$$ = $1;}
+	import_statement SEMICOLON {$$ = $1;, add_node($$, 1, create_node($2));}
 	|
-	import_statement SEMICOLON import_list {$$ = create_node(NULL); add_node($$, $1, $3);}
+	import_statement SEMICOLON import_list {$$ =  $1; add_node($$, 2, create_node($2), $3);}
 	;
 
 import_statement:
-	IMPORT IDENTIFIER {$$ = create_node(NULL); add_node($$, create_node($1), create_node($2));}
+	IMPORT identifier_list {$$ = create_node($1); add_node($$, 1, $2);}
 	|
-	FROM IDENTIFIER IMPORT identifier_list {$$ = create_node($2); add_node($$, $4, NULL);}
+	FROM IDENTIFIER IMPORT identifier_list
+	{$$ = create_node($3); add_node($$, 3, create_node($1), create_node($2), $4);}
 	;
 
 identifier_list:
 	IDENTIFIER {$$ = create_node($1);}
 	|
-	IDENTIFIER COMMA identifier_list {$$ = create_node($1); add_node($$, $3, NULL);}
+	IDENTIFIER COMMA identifier_list {$$ = $3; add_node($$, 2, create_node($1), create_node($2));}
 	;
 
 functions:
-	function {$$ = create_node(NULL); add_node($$, $1, NULL);}
+	function {$$ = $1;}
 	|
-	function functions {$$ = create_node(NULL); add_node($$, $1, $2);}
+	function functions {$$ = $1; add_node($$, 1, $2);}
 	;
 
 function:
-	function_decl scope {$$ = create_node(NULL); add_node($$, $1, NULL);}
+	function_decl scope
+	{$$ = create_node(cbt("function")); add_node($$, 2, $1, $2);}
 	;
 
 function_decl:
-	FUNCTION TYPE IDENTIFIER LEFT_BRACKET RIGHT_BRACKET {$$ = create_node($2); add_node($$, create_node($1), NULL);}
+	FUNCTION TYPE IDENTIFIER LEFT_BRACKET RIGHT_BRACKET
+	{$$ = create_node(cbt("function_signature"));
+	add_node($$, 5, create_node($1), create_node($2), create_node($3), create_node($4), create_node($5));}
 	|
-	FUNCTION TYPE IDENTIFIER LEFT_BRACKET parameter_list RIGHT_BRACKET {$$ = create_node($2); add_node($$, create_node($1), $5);}
+	FUNCTION TYPE IDENTIFIER LEFT_BRACKET parameter_list RIGHT_BRACKET
+	{$$ = create_node(cbt("function_signature"));
+	add_node($$, 5, create_node($1), create_node($2), create_node($3), create_node($4), $5, create_node($6));}
 	;
 
 parameter_list:
-	parameter {$$ = create_node(NULL); add_node($$, $1, NULL);}
+	parameter {$$ = $1;}
 	|
-	parameter_list COMMA parameter {$$ = create_node(NULL); add_node($$, $3, $1);}
+	parameter_list COMMA parameter {$$ = $1; add_node($$, 2, create_node($2), $3);}
 	;
 
 parameter:
-	TYPE IDENTIFIER {$$ = create_node(NULL); add_node($$, create_node($1), create_node($2));}
+	TYPE IDENTIFIER {$$ = create_node(cbt("parameter")); add_node($$, create_node($1), create_node($2));}
 	;
 
 statements:

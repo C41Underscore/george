@@ -1,3 +1,4 @@
+import cheese;
 from stdlib import print;
 
 function float sqrt(float x)
